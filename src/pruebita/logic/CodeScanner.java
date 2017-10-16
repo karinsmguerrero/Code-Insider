@@ -1,0 +1,204 @@
+/**
+ * 
+ */
+package logic;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
+
+/**
+ * @author fmuri
+ *
+ */
+public class CodeScanner {
+	Display display;
+	SimpleList graph_list;
+	
+	public CodeScanner(Display display) {
+		this.display = display;
+		this.graph_list = new SimpleList();
+	}
+	
+	public SimpleList scanWorkspace() {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot root = workspace.getRoot();
+		
+		IProject[] projects = root.getProjects();
+		for (IProject project : projects) {
+			try {
+				printProjectInfo(project);
+			} catch (CoreException | BadLocationException e) {
+				e.printStackTrace();
+			}
+		}
+		return this.graph_list;
+	}
+	
+	private void printProjectInfo(IProject project) throws CoreException, BadLocationException {
+		System.out.println("Working on project " + project.getName());;
+		
+		if (project.isNatureEnabled("org.eclipse.jdt.core.javanature")) {
+			IJavaProject javaProject = JavaCore.create(project);
+			printPackageInfos(javaProject);
+		}
+	}
+	
+	private void printPackageInfos(IJavaProject javaProject) throws JavaModelException, BadLocationException {
+		IPackageFragment[] packages = javaProject.getPackageFragments();
+		for (IPackageFragment mypackage : packages) {
+			if (mypackage.getKind() == IPackageFragmentRoot.K_SOURCE) {
+				System.out.println("Package " + mypackage.getElementName());
+				printICompilationUnitInfo(mypackage);
+			}
+		}
+	}
+	
+	private void printICompilationUnitInfo(IPackageFragment mypackage) throws JavaModelException, BadLocationException {
+		for (ICompilationUnit unit : mypackage.getCompilationUnits()) {
+			printCompilationUnitDetails(unit);
+		}
+	}
+	
+	private void printIMethods(ICompilationUnit unit) throws JavaModelException {
+		IType[] allTypes = unit.getAllTypes();
+		for (IType type : allTypes) {
+			printIMethodDetails(type);
+		}
+	}
+	
+	@SuppressWarnings("deprecation")
+	private void printCompilationUnitDetails(ICompilationUnit unit) throws JavaModelException, BadLocationException {
+		System.out.println("Source file " + unit.getElementName());
+		Document doc = new Document(unit.getSource());
+		String line = doc.get();
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(line.toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		
+		cu.accept(new ASTVisitor() {
+			Set names = new HashSet();
+			SimpleList listaStatements = new SimpleList();
+			
+			public boolean visit(VariableDeclarationFragment node) {
+				SimpleName name = node.getName();
+				this.names.add(name.getIdentifier());
+				System.out.println("Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()));
+				
+				Image simple_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\simple_statement.png");
+				SimpleStatement declaration = new SimpleStatement("declaration", name.toString(), simple_statement);
+				Node statement = new Node(declaration);
+				graph_list.add_element(statement);
+				return false;
+			}
+			
+			public boolean visit(SimpleName node) {
+				if(this.names.contains(node.getIdentifier())) {
+					System.out.println("Usage of '" + node + "' at line" + cu.getLineNumber(node.getStartPosition()));					
+				}
+				return true;
+			}
+			
+			public boolean visit(ForStatement node) {
+				System.out.println("For found at line " + cu.getLineNumber(node.getStartPosition()));
+				System.out.println("For condition: " + node.getExpression().toString());
+				System.out.println("For Body: " + node.getBody().toString());
+				Node insertar = new Node(node.getBody().toString());
+				this.listaStatements.add_element(insertar);
+				
+				Image for_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\for_statement.png");
+				CicleStatement statement = new CicleStatement("for", node.getBody().toString(), for_statement, node.getExpression().toString());
+				Node forStatement = new Node(statement);
+				graph_list.add_element(forStatement);
+				return true;
+			}
+			
+			public boolean visit(WhileStatement node) {
+				System.out.println("While found at line: " + cu.getLineNumber(node.getStartPosition()));
+				System.out.println("While condition: " + node.getExpression().toString());
+				System.out.println(("While body: " + node.getBody().toString()));
+				Node insertar = new Node(node.getBody().toString());
+				this.listaStatements.add_element(insertar);
+				
+				Image while_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\while_statement.png");
+				CicleStatement statement = new CicleStatement("while", node.getBody().toString(), while_statement, node.getExpression().toString());
+				Node whileStatement = new Node(statement);
+				graph_list.add_element(whileStatement);
+				return true;
+			}
+			
+			public boolean visit(IfStatement node) {
+				System.out.println("If found in line: " + cu.getLineNumber(node.getStartPosition()));
+				System.out.println("If condition: " + node.getExpression().toString());
+				System.out.println("If body: " + node.getThenStatement().toString());
+				
+				Image if_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\if_statement.png");
+				SimpleStatement ifStatement = new SimpleStatement("if", node.getExpression().toString(), if_statement);
+				Node if_node = new Node(ifStatement);
+				graph_list.add_element(if_node);
+				return true;
+			}
+			
+			public boolean visit(ExpressionStatement node) {
+				if(!this.listaStatements.listContains(node.getExpression().toString())) {
+					System.out.println(node.getExpression().toString());
+					
+					Image simple_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\simple_statement.png");
+					SimpleStatement statement = new SimpleStatement("statement", node.getExpression().toString(), simple_statement);
+					Node node_statement = new Node(statement);
+					graph_list.add_element(node_statement);
+				}
+				return true;
+			}
+			
+			public boolean visit(MethodInvocation node) {
+				System.out.println("Method Invoked: " + node.getName());
+				
+				Image external_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\external_method.png");
+				SimpleStatement external = new SimpleStatement("external", node.getName().toString(), external_statement);
+				Node node_external = new Node(external);
+				graph_list.add_element(node_external);
+				return true;
+			}
+		});
+		System.out.println("Has number of lines:" + doc.getNumberOfLines());
+	}
+	
+	private void printIMethodDetails(IType type) throws JavaModelException {
+		IMethod[] methods = type.getMethods();
+		for(IMethod method : methods) {
+			System.out.println("Method name " + method.getElementName());
+			System.out.println("Signature " + method.getSignature());
+			System.out.println("Return Type " + method.getReturnType());
+		}
+	}
+}
