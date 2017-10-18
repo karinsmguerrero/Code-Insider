@@ -1,4 +1,4 @@
-package logic;
+package pruebita.logic;
 
 import org.eclipse.swt.graphics.Image;
 

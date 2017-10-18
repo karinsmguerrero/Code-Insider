@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package logic;
+package pruebita.logic;
 
 public class Node {
     private Node next;

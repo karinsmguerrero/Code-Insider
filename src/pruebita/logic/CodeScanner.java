@@ -1,7 +1,7 @@
 /**
  * 
  */
-package logic;
+package pruebita.logic;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -114,7 +114,7 @@ public class CodeScanner {
 				this.names.add(name.getIdentifier());
 				System.out.println("Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()));
 				
-				Image simple_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\simple_statement.png");
+				Image simple_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\simple_statement.png");
 				SimpleStatement declaration = new SimpleStatement("declaration", name.toString(), simple_statement);
 				Node statement = new Node(declaration);
 				graph_list.add_element(statement);
@@ -134,8 +134,8 @@ public class CodeScanner {
 				System.out.println("For Body: " + node.getBody().toString());
 				Node insertar = new Node(node.getBody().toString());
 				this.listaStatements.add_element(insertar);
-				
-				Image for_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\for_statement.png");
+
+				Image for_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\for_statement.png");
 				CicleStatement statement = new CicleStatement("for", node.getBody().toString(), for_statement, node.getExpression().toString());
 				Node forStatement = new Node(statement);
 				graph_list.add_element(forStatement);
@@ -149,7 +149,7 @@ public class CodeScanner {
 				Node insertar = new Node(node.getBody().toString());
 				this.listaStatements.add_element(insertar);
 				
-				Image while_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\while_statement.png");
+				Image while_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\while_statement.png");
 				CicleStatement statement = new CicleStatement("while", node.getBody().toString(), while_statement, node.getExpression().toString());
 				Node whileStatement = new Node(statement);
 				graph_list.add_element(whileStatement);
@@ -161,7 +161,7 @@ public class CodeScanner {
 				System.out.println("If condition: " + node.getExpression().toString());
 				System.out.println("If body: " + node.getThenStatement().toString());
 				
-				Image if_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\if_statement.png");
+				Image if_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\if_statement.png");
 				SimpleStatement ifStatement = new SimpleStatement("if", node.getExpression().toString(), if_statement);
 				Node if_node = new Node(ifStatement);
 				graph_list.add_element(if_node);
@@ -172,7 +172,7 @@ public class CodeScanner {
 				if(!this.listaStatements.listContains(node.getExpression().toString())) {
 					System.out.println(node.getExpression().toString());
 					
-					Image simple_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\simple_statement.png");
+					Image simple_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\simple_statement.png");
 					SimpleStatement statement = new SimpleStatement("statement", node.getExpression().toString(), simple_statement);
 					Node node_statement = new Node(statement);
 					graph_list.add_element(node_statement);
@@ -183,7 +183,7 @@ public class CodeScanner {
 			public boolean visit(MethodInvocation node) {
 				System.out.println("Method Invoked: " + node.getName());
 				
-				Image external_statement = new Image(display, "D:\\Users\\fmuri\\eclipse-workspace\\com.vogella.jdt.infos\\src\\gui\\image\\external_method.png");
+				Image external_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\external_method.png");
 				SimpleStatement external = new SimpleStatement("external", node.getName().toString(), external_statement);
 				Node node_external = new Node(external);
 				graph_list.add_element(node_external);
