@@ -42,10 +42,15 @@ import org.eclipse.swt.widgets.Display;
 public class CodeScanner {
 	Display display;
 	SimpleList graph_list;
+	String code = "";
 	
 	public CodeScanner(Display display) {
 		this.display = display;
 		this.graph_list = new SimpleList();
+	}
+	
+	public String getCode(){
+		return code;
 	}
 	
 	public SimpleList scanWorkspace() {
@@ -112,7 +117,8 @@ public class CodeScanner {
 			public boolean visit(VariableDeclarationFragment node) {
 				SimpleName name = node.getName();
 				this.names.add(name.getIdentifier());
-				System.out.println("Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()));
+				//System.out.println("Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()));
+				code += "Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()) + "\n";
 				
 				Image simple_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\simple_statement.png");
 				SimpleStatement declaration = new SimpleStatement("declaration", name.toString(), simple_statement);
@@ -123,15 +129,21 @@ public class CodeScanner {
 			
 			public boolean visit(SimpleName node) {
 				if(this.names.contains(node.getIdentifier())) {
-					System.out.println("Usage of '" + node + "' at line" + cu.getLineNumber(node.getStartPosition()));					
+					//System.out.println("Usage of '" + node + "' at line" + cu.getLineNumber(node.getStartPosition()));
+					code += "Usage of '" + node + "' at line" + cu.getLineNumber(node.getStartPosition()) + "\n";
 				}
 				return true;
 			}
 			
 			public boolean visit(ForStatement node) {
-				System.out.println("For found at line " + cu.getLineNumber(node.getStartPosition()));
-				System.out.println("For condition: " + node.getExpression().toString());
-				System.out.println("For Body: " + node.getBody().toString());
+//				System.out.println("For found at line " + cu.getLineNumber(node.getStartPosition()));
+				code += "For found at line " + cu.getLineNumber(node.getStartPosition()) + "\n";
+//				System.out.println("For condition: " + node.getExpression().toString());
+				code += "For condition: " + node.getExpression().toString() + "\n";
+				
+//				System.out.println("For Body: " + node.getBody().toString());
+				code += "For Body: " + node.getBody().toString() + "\n";
+				
 				Node insertar = new Node(node.getBody().toString());
 				this.listaStatements.add_element(insertar);
 
@@ -143,9 +155,12 @@ public class CodeScanner {
 			}
 			
 			public boolean visit(WhileStatement node) {
-				System.out.println("While found at line: " + cu.getLineNumber(node.getStartPosition()));
-				System.out.println("While condition: " + node.getExpression().toString());
-				System.out.println(("While body: " + node.getBody().toString()));
+//				System.out.println("While found at line: " + cu.getLineNumber(node.getStartPosition()));
+				code += "While found at line: " + cu.getLineNumber(node.getStartPosition()) + "\n";
+//				System.out.println("While condition: " + node.getExpression().toString());
+				code += "While condition: " + node.getExpression().toString() + "\n";
+//				System.out.println(("While body: " + node.getBody().toString()));
+				code += "While body: " + node.getBody().toString() + "\n";
 				Node insertar = new Node(node.getBody().toString());
 				this.listaStatements.add_element(insertar);
 				
@@ -157,9 +172,12 @@ public class CodeScanner {
 			}
 			
 			public boolean visit(IfStatement node) {
-				System.out.println("If found in line: " + cu.getLineNumber(node.getStartPosition()));
-				System.out.println("If condition: " + node.getExpression().toString());
-				System.out.println("If body: " + node.getThenStatement().toString());
+//				System.out.println("If found in line: " + cu.getLineNumber(node.getStartPosition()));
+				code += "If found in line: " + cu.getLineNumber(node.getStartPosition()) + "\n";
+//				System.out.println("If condition: " + node.getExpression().toString());
+				code += "If condition: " + node.getExpression().toString() + "\n";
+//				System.out.println("If body: " + node.getThenStatement().toString());
+				code += "If body: " + node.getThenStatement().toString() + "\n";
 				
 				Image if_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\if_statement.png");
 				SimpleStatement ifStatement = new SimpleStatement("if", node.getExpression().toString(), if_statement);
@@ -170,7 +188,8 @@ public class CodeScanner {
 			
 			public boolean visit(ExpressionStatement node) {
 				if(!this.listaStatements.listContains(node.getExpression().toString())) {
-					System.out.println(node.getExpression().toString());
+					//System.out.println(node.getExpression().toString());
+					code += node.getExpression().toString() + "\n";
 					
 					Image simple_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\simple_statement.png");
 					SimpleStatement statement = new SimpleStatement("statement", node.getExpression().toString(), simple_statement);
@@ -181,7 +200,8 @@ public class CodeScanner {
 			}
 			
 			public boolean visit(MethodInvocation node) {
-				System.out.println("Method Invoked: " + node.getName());
+				//System.out.println("Method Invoked: " + node.getName());
+				code += "Method Invoked: " + node.getName() + "\n";
 				
 				Image external_statement = new Image(display, "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\external_method.png");
 				SimpleStatement external = new SimpleStatement("external", node.getName().toString(), external_statement);
@@ -190,7 +210,8 @@ public class CodeScanner {
 				return true;
 			}
 		});
-		System.out.println("Has number of lines:" + doc.getNumberOfLines());
+		//System.out.println("Has number of lines:" + doc.getNumberOfLines());
+		code += "Has number of lines:" + doc.getNumberOfLines() + "\n";
 	}
 	
 	private void printIMethodDetails(IType type) throws JavaModelException {
