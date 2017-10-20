@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pruebita.logic;
+package logic;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -44,5 +44,9 @@ public class SimpleStatement {
 	public void setImage(Image image) {
 		this.image = image;
 	}
+	
+	
+	
+	
 
 }
