@@ -44,5 +44,9 @@ public class SimpleStatement {
 	public void setImage(Image image) {
 		this.image = image;
 	}
+	
+	
+	
+	
 
 }

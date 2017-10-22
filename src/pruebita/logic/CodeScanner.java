@@ -3,6 +3,7 @@
  */
 package pruebita.logic;
 
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,6 +12,8 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -30,10 +33,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * @author fmuri
@@ -43,10 +49,13 @@ public class CodeScanner {
 	Display display;
 	SimpleList graph_list;
 	String code = "";
+	String complexity;
+
 	
 	public CodeScanner(Display display) {
 		this.display = display;
 		this.graph_list = new SimpleList();
+		this.complexity = "";
 	}
 	
 	public String getCode(){
@@ -59,10 +68,12 @@ public class CodeScanner {
 		
 		IProject[] projects = root.getProjects();
 		for (IProject project : projects) {
-			try {
-				printProjectInfo(project);
-			} catch (CoreException | BadLocationException e) {
-				e.printStackTrace();
+			if (project.getName().equals("Test")) {
+				try {
+					printProjectInfo(project);
+				} catch (CoreException | BadLocationException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return this.graph_list;
@@ -109,6 +120,7 @@ public class CodeScanner {
 		parser.setSource(line.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
 		
 		cu.accept(new ASTVisitor() {
 			Set names = new HashSet();
@@ -212,6 +224,11 @@ public class CodeScanner {
 		});
 		//System.out.println("Has number of lines:" + doc.getNumberOfLines());
 		code += "Has number of lines:" + doc.getNumberOfLines() + "\n";
+		CodeVisitor visitor = new CodeVisitor(cu);
+		cu.accept(visitor.getVisitor());
+		this.graph_list = visitor.getGraph_list();
+		this.complexity = visitor.getComplexity();
+		System.out.println("Has number of lines:" + doc.getNumberOfLines());
 	}
 	
 	private void printIMethodDetails(IType type) throws JavaModelException {
