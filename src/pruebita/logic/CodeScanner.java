@@ -68,7 +68,7 @@ public class CodeScanner {
 		
 		IProject[] projects = root.getProjects();
 		for (IProject project : projects) {
-			if (project.getName().equals("Test")) {
+			if (project.getName().equals("saxs")) {
 				try {
 					printProjectInfo(project);
 				} catch (CoreException | BadLocationException e) {

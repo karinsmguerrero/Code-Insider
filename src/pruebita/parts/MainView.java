@@ -1,5 +1,8 @@
 package pruebita.parts;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -27,7 +30,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IViewPart;
 
+import debugger.SimpleTrace;
 import pruebita.handlers.DiagramPainter;
+import pruebita.logic.CodeScanner;
 
 public class MainView {
 
@@ -40,7 +45,7 @@ public class MainView {
 	private ScrolledComposite scroller;
 	private Image img;
 	private Composite comp;
-	private Point point = new Point(10,10);
+	private Point point = new Point(10, 10);
 
 	/**
 	 * Método que crea los controles Se deben declarar aquí los controles que
@@ -82,23 +87,23 @@ public class MainView {
 		txtCode.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtCode.pack();
 
-//		DiagramContainer diagram = new DiagramContainer();
-//		scroller = diagram.createContainer(diagramGroup);
-//		scroller.pack();
-//		comp = (Composite)scroller.getChildren()[0];
-		//diagramGroup.pack();
-		
-		//FillLayout fillLayout = new FillLayout(SWT.VERTICAL);
+		// DiagramContainer diagram = new DiagramContainer();
+		// scroller = diagram.createContainer(diagramGroup);
+		// scroller.pack();
+		// comp = (Composite)scroller.getChildren()[0];
+		// diagramGroup.pack();
+
+		// FillLayout fillLayout = new FillLayout(SWT.VERTICAL);
 		scroller = new ScrolledComposite(diagramGroup, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		scroller.setLayout(fillLayout);
 
 		comp = new Composite(scroller, SWT.BORDER);
-		//comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		//comp.setLayout(new GridLayout(1, true));
-		comp.setLayout(fillLayout);		
+		// comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		// comp.setLayout(new GridLayout(1, true));
+		comp.setLayout(fillLayout);
 		comp.pack();
-		
-		//scroller.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+
+		// scroller.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scroller.setExpandHorizontal(true);
 		scroller.setExpandVertical(true);
 		scroller.setContent(comp);
@@ -117,35 +122,52 @@ public class MainView {
 	}
 
 	private void click() {
-		
-		DiagramPainter painter = new DiagramPainter();
-		//painter.paint(cnv);
-		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText("hola" + point.y);
-		lbl.setImage(new Image(lbl.getDisplay(), "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\for_statement.png"));
-		point.y = point.y += 10;
-		lbl.setLocation(point);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
-		lbl.pack();
-		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		comp.setLayout(new GridLayout(1, true));
-		//comp.setLayout(new FillLayout());
-		comp.pack();
-		scroller.setExpandVertical(true);
-		scroller.setExpandHorizontal(true);
-		scroller.setContent(comp);
 
-		
-		//txtVar.setText(painter.getCode());
-		//String mess = txtVar.getText() ;
-		//txtVar.setText(mess += "clicked");
-		
+		Runtime runtime = Runtime.getRuntime();
+		try {
+			Process p1 = runtime.exec("cmd /c start C:\\Users\\karin\\Downloads\\SimpleTrace\\SimpleTrace\\runTrace.bat Example");
+			InputStream is = p1.getInputStream();
+			int i = 0;
+			while ((i = is.read()) != -1) {
+				System.out.print((char) i);
+				System.out.println(is);
+			}
+		} catch (IOException ioException) {
+			System.out.println(ioException.getMessage());
+		}
+
+		DiagramPainter painter = new DiagramPainter();
+
+		comp.setRedraw(false);
+		painter.paintDiagram(comp);
+		// // painter.paint(cnv);
+		// Label lbl = new Label(comp, SWT.NONE);
+		// //lbl.setText("hola" + point.y);
+		// lbl.setImage(new Image(lbl.getDisplay(),
+		// "C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\for_statement.png"));
+		// //point.y = point.y += 10;
+		// //lbl.setLocation(point);
+		// lbl.pack();
+		//
+		comp.setRedraw(true);
+		comp.layout(true);
+		//
+		scroller.setMinSize(comp.computeSize(SWT.DEFAULT, scroller.getSize().y));
+		// // comp.setLayout(new FillLayout());
+		//// comp.pack();
+		//// scroller.setExpandVertical(true);
+		//// scroller.setExpandHorizontal(true);
+		//// scroller.setContent(comp);
+		//
+		// // txtVar.setText(painter.getCode());
+		// // String mess = txtVar.getText() ;
+		// // txtVar.setText(mess += "clicked");
+
 	}
-	
 
 	@Focus
 	public void setFocus() {
-		
+
 	}
 
 	/**

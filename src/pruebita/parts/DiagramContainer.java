@@ -23,12 +23,6 @@ public class DiagramContainer {
 
 		Composite parent = new Composite(scroller, SWT.NONE);
 		parent.setLayout(fillLayout);
-//		Label lbl = new Label(parent, SWT.NONE);
-//		lbl.setImage(new Image(lbl.getDisplay(), "C:\\Users\\karin\\desktop\\20161105_192330.jpg"));
-//		lbl.pack();
-//		Label lbl2 = new Label(parent, SWT.NONE);
-//		lbl2.setImage(new Image(lbl2.getDisplay(), "C:\\Users\\karin\\desktop\\20161105_192336.jpg"));
-//		lbl2.pack();
 		parent.pack();
 		scroller.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scroller.setContent(parent);
