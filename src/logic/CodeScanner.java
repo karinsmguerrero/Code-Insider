@@ -1,7 +1,7 @@
 /**
  * 
  */
-package pruebita.logic;
+package logic;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -26,10 +26,25 @@ import org.eclipse.swt.widgets.Display;
  *
  */
 public class CodeScanner {
+	/**
+	 * Atributo que guardara el display en donde generara la imagen para swt
+	 */
 	Display display;
+	/**
+	 * lista de todas las clases que encontro en el proyecto escaneado.
+	 */
 	SimpleList class_list;
+	/**
+	 * String que contiene la complejidad algoritmica
+	 */
 	String complexity;
+	/**
+	 * Ruta de acceso en donde se encuentra el proyeto en disco
+	 */
 	String proyect_path;
+	/**
+	 * Nombre del proyecto
+	 */
 	String proyect_name;
 	
 	public CodeScanner(Display display) {
@@ -38,6 +53,10 @@ public class CodeScanner {
 		this.complexity = "";
 	}
 	
+	/**
+	 * Metodo encargado de realizar los llamados a los metodos privados para realizar el escaneo del proyecto.
+	 * @return retorna la lista de todas las clases escaneadas.
+	 */
 	public SimpleList scanWorkspace() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
@@ -55,6 +74,10 @@ public class CodeScanner {
 		return this.class_list;
 	}
 	
+	/**
+	 * Encargadaa de mostrar en pantalla todos los detalles del proyecto escaneado.
+	 * @param project Variable que contiene el proyecto a escanear.
+	 */
 	private void printProjectInfo(IProject project) throws CoreException, BadLocationException {
 		System.out.println("Working on project " + project.getName());;
 		this.proyect_name = project.getName();
@@ -65,6 +88,10 @@ public class CodeScanner {
 		}
 	}
 	
+	/**
+	 * Encargada de mostrar toda la informacion del paquete que se esta escaneando, y de llamar al metodo para el escaneo de todos los archivos .java
+	 * @param javaProject Proyecto de tipo "java proyect que se desea escanear."
+	 */
 	private void printPackageInfos(IJavaProject javaProject) throws JavaModelException, BadLocationException {
 		IPackageFragment[] packages = javaProject.getPackageFragments();
 		for (IPackageFragment mypackage : packages) {
@@ -75,6 +102,10 @@ public class CodeScanner {
 		}
 	}
 	
+	/**
+	 * Encargada de realizar el escaneo uno por uno de los archivos .java encontrados.
+	 * @param mypackage packete encontrado dentro del proyecto, que se va a escanear para encontrar todos sus archivos .java
+	 */
 	private void printICompilationUnitInfo(IPackageFragment mypackage) throws JavaModelException, BadLocationException {
 		for (ICompilationUnit unit : mypackage.getCompilationUnits()) {
 			printCompilationUnitDetails(unit);
@@ -82,6 +113,10 @@ public class CodeScanner {
 	}
 	
 	
+	/**
+	 * Metodo encargado de parsear el codigo de un archivo .java y realizar el esuqema del codigo de dicha clase seleccionada.
+	 * @param unit unidad de compilacion (archivo .java) a escanear.
+	 */
 	@SuppressWarnings("deprecation")
 	private void printCompilationUnitDetails(ICompilationUnit unit) throws JavaModelException, BadLocationException {
 		System.out.println("Source file " + unit.getElementName());
@@ -91,13 +126,14 @@ public class CodeScanner {
 		parser.setSource(line.toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-		CodeVisitor visitor = new CodeVisitor(cu);
+		CodeVisitor visitor = new CodeVisitor(cu, this.display);
 		cu.accept(visitor.getVisitor());
 		ClassSqueme class_info = new ClassSqueme();
 		class_info.setGrap_lList(visitor.getGraph_list());
 		class_info.setMethod_list(visitor.getMethodList());
 		class_info.setIs_main(visitor.getIs_main());
 		class_info.path = unit.getPath();
+		class_info.setCode(line);
 		Node add_class = new Node(class_info);
 		this.class_list.add_element(add_class);
 		this.complexity = visitor.getComplexity();

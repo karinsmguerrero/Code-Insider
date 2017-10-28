@@ -25,24 +25,11 @@ public class SimpleStatement {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	public String getStatement() {
 		return statement;
 	}
-
-	public void setStatement(String statement) {
-		this.statement = statement;
-	}
-
 	public Image getImage() {
 		return image;
-	}
-
-	public void setImage(Image image) {
-		this.image = image;
 	}
 	
 	

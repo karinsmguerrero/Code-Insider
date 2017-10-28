@@ -3,12 +3,15 @@
 <plugin>
 
    <extension
-         id="pruebita.fragment"
+         id="codeinsider.fragment"
          point="org.eclipse.e4.workbench.model">
       <fragment
-            apply="initial"
+            apply="notexists"
             uri="fragment.e4xmi">
       </fragment>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
    </extension>
 
 </plugin>

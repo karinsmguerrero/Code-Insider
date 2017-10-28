@@ -1,14 +1,11 @@
 /**
  * 
  */
-package pruebita.logic;
+package logic;
 
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -19,10 +16,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.FrameworkUtil;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author fmuri
@@ -30,18 +25,39 @@ import org.osgi.framework.FrameworkUtil;
  */
 public class CodeVisitor{
 	
+	/**
+	 * Clase visitor (iterator) que se encarga de recorrer el AST del codigo generado para identificar la accion de cada linea de codigo
+	 */
 	private ASTVisitor visitor;
+	/**
+	 * Lista que contiene los statements que se encontraron en el codigo
+	 */
 	private SimpleList graph_list;
+	/**
+	 * String que guarda la complejidad algoritmica.
+	 */
 	private String complexity;
+	/**
+	 * Indica si la clase escaneada es la main class
+	 */
 	private Boolean is_main;
+	/**
+	 * Lista de todos los metodos declarados en esta clase.
+	 */
 	private SimpleList method_list;
+
+	/**
+	 * Display utilizado para dibujar las imagenes en swt.
+	 */
+	private Display display;
 	
-	public CodeVisitor(CompilationUnit cu) {
+	public CodeVisitor(CompilationUnit cu, Display display) {
 		this.graph_list = new SimpleList();
 		this.visitor = this.createVisitor(graph_list, cu);
 		this.complexity = "";
 		this.is_main = false;
 		this.method_list = new SimpleList();
+		this.display = display;
 	}
 	
 	private ASTVisitor createVisitor(SimpleList graph_list, CompilationUnit cu) {
@@ -49,23 +65,27 @@ public class CodeVisitor{
 			Set names = new HashSet();
 			SimpleList listaStatements = new SimpleList();
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.VariableDeclarationFragment)
+			 * QUe hacer en caso de que el nodo encontrado sea una declaracion de una variable.
+			 */
 			public boolean visit(VariableDeclarationFragment node) {
 				SimpleName name = node.getName();
 				this.names.add(name.getIdentifier());
 				System.out.println("Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()));
-				
-				Bundle bundle = FrameworkUtil.getBundle(getClass());
-				String path = "/gui/image/simple_statement.png";
-				URL url = FileLocator.find(bundle, new Path(path), null);
-				ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-				Image simple_statement = imageDesc.createImage();
+				Image simple_statement = new Image(display, CodeVisitor.class.getResourceAsStream("simple_statement.png"));
 				
 				StatementFactory declaration = new StatementFactory("declaration", name.toString(), simple_statement);
-				Node statement = new Node(declaration);
+				SimpleStatement line = (SimpleStatement) declaration.getStatement();
+				Node statement = new Node(line);
 				graph_list.add_element(statement);
 				return false;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SimpleName)
+			 * Caso en el que el nodo sea el uso de una variable.
+			 */
 			public boolean visit(SimpleName node) {
 				if(this.names.contains(node.getIdentifier())) {
 					System.out.println("Usage of '" + node + "' at line" + cu.getLineNumber(node.getStartPosition()));					
@@ -73,6 +93,10 @@ public class CodeVisitor{
 				return true;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
+			 * En caso de que el nodo visitado sea un for
+			 */
 			public boolean visit(ForStatement node) {
 				System.out.println("For found at line " + cu.getLineNumber(node.getStartPosition()));
 				System.out.println("For condition: " + node.getExpression().toString());
@@ -80,14 +104,11 @@ public class CodeVisitor{
 				Node insertar = new Node(node.getBody().toString());
 				this.listaStatements.add_element(insertar);
 				
-				Bundle bundle = FrameworkUtil.getBundle(getClass());
-				String path = "/gui/image/for_statement.png";
-				URL url = FileLocator.find(bundle, new Path(path), null);
-				ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-				Image for_statement = imageDesc.createImage();
+				Image for_statement = new Image(display, CodeVisitor.class.getResourceAsStream("for_statement.png"));
 				
 				StatementFactory statement = new StatementFactory("for", node.getBody().toString(), for_statement, node.getExpression().toString());
-				Node forStatement = new Node(statement);
+				ConditionStatement line = (ConditionStatement) statement.getStatement();
+				Node forStatement = new Node(line);
 			
 				String str = node.getBody().toString();
 				String findStr = "for";
@@ -155,6 +176,10 @@ public class CodeVisitor{
 				return true;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
+			 * Caso en el que el nodo visitado sea un While
+			 */
 			public boolean visit(WhileStatement node) {
 				System.out.println("While found at line: " + cu.getLineNumber(node.getStartPosition()));
 				System.out.println("While condition: " + node.getExpression().toString());
@@ -162,15 +187,12 @@ public class CodeVisitor{
 				Node insertar = new Node(node.getBody().toString());
 				this.listaStatements.add_element(insertar);
 				
-				Bundle bundle = FrameworkUtil.getBundle(getClass());
-				String path = "/gui/image/while_statement.png";
-				URL url = FileLocator.find(bundle, new Path(path), null);
-				ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-				Image while_statement = imageDesc.createImage();
+				Image while_statement = new Image(display, CodeVisitor.class.getResourceAsStream("while_statement.png"));
 				
 				
 				StatementFactory statement = new StatementFactory("while", node.getBody().toString(), while_statement, node.getExpression().toString());
-				Node whileStatement = new Node(statement);
+				ConditionStatement line = (ConditionStatement) statement.getStatement();
+				Node whileStatement = new Node(line);
 				graph_list.add_element(whileStatement);
 				
 				String str = node.getBody().toString();
@@ -240,61 +262,70 @@ public class CodeVisitor{
 				return true;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
+			 * Caso en el que el nodo visitado sea un if
+			 */
 			public boolean visit(IfStatement node) {
 				System.out.println("If found in line: " + cu.getLineNumber(node.getStartPosition()));
 				System.out.println("If condition: " + node.getExpression().toString());
 				System.out.println("If body: " + node.getThenStatement().toString());
 				
-				Bundle bundle = FrameworkUtil.getBundle(getClass());
-				String path = "/gui/image/if_statement.png";
-				URL url = FileLocator.find(bundle, new Path(path), null);
-				ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-				Image if_statement = imageDesc.createImage();
+				Image if_statement = new Image(display, CodeVisitor.class.getResourceAsStream("if_statement.png"));
 
 				StatementFactory ifStatement = new StatementFactory("if", node.getExpression().toString(), if_statement, node.getThenStatement().toString());
-				Node if_node = new Node(ifStatement);
+				ConditionStatement line = (ConditionStatement) ifStatement.getStatement();
+				Node if_node = new Node(line);
 				graph_list.add_element(if_node);
 				return true;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ExpressionStatement)
+			 * caso en el que el nodo visitado sea una expresion
+			 */
 			public boolean visit(ExpressionStatement node) {
 				if(!this.listaStatements.listContains(node.getExpression().toString())) {
 					System.out.println(node.getExpression().toString());
 					
-					Bundle bundle = FrameworkUtil.getBundle(getClass());
-					String path = "/gui/image/simple_statement.png";
-					URL url = FileLocator.find(bundle, new Path(path), null);
-					ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-					Image simple_statement = imageDesc.createImage();
+					Image simple_statement = new Image(display, CodeVisitor.class.getResourceAsStream("simple_statement.png"));
 					
 					StatementFactory statement = new StatementFactory("statement", node.getExpression().toString(), simple_statement);
-					Node node_statement = new Node(statement);
+					SimpleStatement line = (SimpleStatement) statement.getStatement();
+					Node node_statement = new Node(line);
 					graph_list.add_element(node_statement);
 				}
 				return true;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodInvocation)
+			 */
 			public boolean visit(MethodInvocation node) {
 				System.out.println("Method Invoked: " + node.getName());
 				
-				Bundle bundle = FrameworkUtil.getBundle(getClass());
-				String path = "/gui/image/external_method.png";
-				URL url = FileLocator.find(bundle, new Path(path), null);
-				ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-				Image external_statement = imageDesc.createImage();
-				SimpleStatement external = new SimpleStatement("external", node.getName().toString(), external_statement);
-				Node node_external = new Node(external);
+				Image external_statement = new Image(display, CodeVisitor.class.getResourceAsStream("external_method.png"));
+				
+				StatementFactory external = new StatementFactory("external", node.getName().toString(), external_statement);
+				SimpleStatement line = (SimpleStatement) external.getStatement();
+				Node node_external = new Node(line);
 				graph_list.add_element(node_external);
 				return true;
 			}
 			
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
+			 * caso en el que el nodo visitado sea una declaracion de un metodo.
+			 */
 			public boolean visit(MethodDeclaration node) {
 				System.out.println("Method declared: " + node.getName().toString());
 				if(node.getName().toString().equals("main")) {
 					is_main = true;
 				}else {
-					StatementFactory factory = new StatementFactory("method", node.getName().toString(), null, node.getBody().toString());
-					Node node_method = new Node(factory);
+					Image external_statement = new Image(display, CodeVisitor.class.getResourceAsStream("external_method.png"));
+					StatementFactory factory = new StatementFactory("method", node.getName().toString(), external_statement, node.getBody().toString());
+					ConditionStatement line = (ConditionStatement) factory.getStatement();
+					Node node_method = new Node(line);
 					method_list.add_element(node_method);
 				}
 				return true;

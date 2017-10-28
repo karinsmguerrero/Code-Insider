@@ -1,9 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Pruebita
-Bundle-SymbolicName: pruebita;singleton:=true
+Bundle-Name: Code-Insider
+Bundle-SymbolicName: Code-Insider;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: pruebita.Activator
 Require-Bundle: javax.inject,
  org.eclipse.osgi,
  org.eclipse.jface,
@@ -11,18 +10,15 @@ Require-Bundle: javax.inject,
  org.eclipse.e4.ui.di,
  org.eclipse.e4.ui.services,
  org.eclipse.e4.core.di.annotations,
- org.eclipse.core.runtime,
- org.eclipse.ui.editors;bundle-version="3.10.1",
- org.eclipse.jface.text;bundle-version="3.11.2",
- org.eclipse.debug.ui;bundle-version="3.11.202",
- org.eclipse.ui;bundle-version="3.108.1",
- org.eclipse.e4.core.services;bundle-version="2.0.100",
- org.eclipse.jdt.core;bundle-version="3.12.3",
- org.eclipse.e4.core.contexts;bundle-version="1.5.1",
- org.eclipse.e4.ui.workbench;bundle-version="1.4.0",
- org.eclipse.jdt.debug
+ org.eclipse.ui,
+ org.eclipse.swt,
+ org.eclipse.core.resources;bundle-version="3.12.0",
+ org.eclipse.jdt;bundle-version="3.13.1",
+ org.eclipse.jdt.core;bundle-version="3.13.50",
+ org.eclipse.core.runtime;bundle-version="3.13.0",
+ org.eclipse.jdt.ui;bundle-version="3.13.50",
+ org.eclipse.jface.text;bundle-version="3.12.0",
+ org.eclipse.debug.core;bundle-version="3.11.0",
+ org.eclipse.jdt.launching;bundle-version="3.9.50"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: javax.annotation;version="1.2.0",
- org.apache.xmlrpc;version="0.0.0",
- javax.xml.bind; version="0.0.0"
-Bundle-ActivationPolicy: lazy
+Import-Package: javax.annotation;version="1.2.0"

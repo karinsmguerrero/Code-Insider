@@ -18,7 +18,7 @@ public class StatementFactory {
 	}
 	
 	public StatementFactory(String type, String context, Image image, String body) {
-		this.statement = new CicleStatement(type, context, image, body);
+		this.statement = new ConditionStatement(type, context, image, body);
 		
 	}
 

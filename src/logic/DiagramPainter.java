@@ -1,40 +1,60 @@
-package pruebita.handlers;
+package logic;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import pruebita.logic.CodeScanner;
-import pruebita.logic.ConditionStatement;
-import pruebita.logic.Node;
-import pruebita.logic.SimpleList;
-import pruebita.logic.SimpleStatement;
-
 public class DiagramPainter {
 	private CodeScanner codesc;
 
-	public void paintDiagram(Composite comp) {
-		CodeScanner scanner = new CodeScanner(comp.getDisplay());
-//		Label lbl = new Label(comp, SWT.NONE);
-//		lbl.setImage(new Image(lbl.getDisplay(),
-//				"C:\\Users\\karin\\workspace3\\pruebita\\src\\pruebita\\gui\\image\\for_statement.png"));
-//		//point.y = point.y += 10;
-//		//lbl.setLocation(point);
-//		lbl.pack();
-		Image[] imgs = getImages(scanner.scanWorkspace());
-		System.out.println("Holaaaa");
-		System.out.println("Tamaño de lista" + imgs.length);
-		for (Image img: imgs) {
-			System.out.println("Entrando");
-			Label lbl = new Label(comp, SWT.NONE);
-			lbl.setVisible(true);
-			lbl.setImage(img);
-			lbl.pack();
-			System.out.println(img);
+	public void paintDiagram(Composite comp, SimpleList graph, int index, Label lbl) {
+		Node selected = graph.get(index);
+		if(selected.getDato().getClass() == SimpleStatement.class) {
+			SimpleStatement draw = (SimpleStatement) selected.getDato();
+			if(draw.getType().equals("statement") || draw.getType().equals("declaration")) {
+				GC gc = new GC(draw.getImage());
+				gc.drawText(draw.getStatement(),130,60,true);
+				gc.dispose();
+				lbl.setVisible(true);
+				lbl.setImage(draw.getImage());
+				lbl.setLocation(100, 100);
+				lbl.pack();
+			}
+			if(draw.getType().equals("external")) {
+				GC gc = new GC(draw.getImage());
+				gc.drawText(draw.getStatement(),150,80,true);
+				gc.dispose();
+				lbl.setVisible(true);
+				lbl.setImage(draw.getImage());
+				lbl.setLocation(100, 100);
+				lbl.pack();
+			}
 		}
-		//comp.pack();
+		if(selected.getDato().getClass() == ConditionStatement.class) {
+			ConditionStatement draw = (ConditionStatement) selected.getDato();
+			if(draw.getType().equals("for")) {
+				lbl.setVisible(true);
+				GC gc = new GC(draw.getImage());
+				gc.drawText(draw.getCondition(),215,90,true);
+				gc.drawText(draw.getStatement(), 145, 230, true);
+				gc.dispose();
+				lbl.setImage(draw.getImage());
+				lbl.pack();
+			}
+			if(draw.getType().equals("while")) {
+				lbl.setVisible(true);
+				GC gc = new GC(draw.getImage());
+				gc.drawText(draw.getCondition(),190,110,true);
+				gc.drawText(draw.getStatement(), 140, 235, true);
+				gc.dispose();
+				lbl.setImage(draw.getImage());
+				lbl.pack();
+			}
+
+		}
 	}
 
 	public void paint(Canvas cnv) {
