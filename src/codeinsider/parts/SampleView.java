@@ -126,7 +126,7 @@ public class SampleView {
 		comp.setRedraw(true);
 		comp.layout(true);
 		scroller.setMinSize(comp.computeSize(SWT.DEFAULT, scroller.getSize().y));
-		String path = "D:\\Users\\fmuri\\eclipse-workspace\\Test\\src\\Test.java";
+		String path = "D:\\Users\\fmuri\\eclipse-workspace\\Test\\src\\Test.jar";
 		try {
 			Runtime.getRuntime().exec("java -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000 -jar " + path);
 			txtVar.setText("Running");
